@@ -1,0 +1,15 @@
+{
+  "nombre": "Remera básica",
+  "descripcion": "Remera de algodón, color blanco",
+  "precio": 3500,
+  "categoria": "hombre",
+  "talla": "M",
+  "stock": 20,
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.15.1"
+  }
+}
