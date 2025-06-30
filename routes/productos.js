@@ -1,18 +1,6 @@
 const express = require('express');
-const Producto = require('../models/producto');
 const router = express.Router();
-
-// Crear producto
-router.post('/', async (req, res) => {
-  const { nombre, descripcion, precio, categoria, stock } = req.body;
-  try {
-    const nuevoProducto = new Producto({ nombre, descripcion, precio, categoria, stock });
-    await nuevoProducto.save();
-    res.json(nuevoProducto);
-  } catch (err) {
-    res.status(500).send('Error al crear producto');
-  }
-});
+const Producto = require('../models/producto');
 
 // Obtener todos los productos
 router.get('/', async (req, res) => {
@@ -20,7 +8,28 @@ router.get('/', async (req, res) => {
     const productos = await Producto.find();
     res.json(productos);
   } catch (err) {
-    res.status(500).send('Error al obtener productos');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Crear un producto
+router.post('/', async (req, res) => {
+  try {
+    const nuevoProducto = new Producto(req.body);
+    const productoGuardado = await nuevoProducto.save();
+    res.json(productoGuardado);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Eliminar un producto
+router.delete('/:id', async (req, res) => {
+  try {
+    await Producto.findByIdAndDelete(req.params.id);
+    res.json({ mensaje: 'Producto eliminado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

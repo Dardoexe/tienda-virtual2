@@ -1,17 +1,26 @@
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-
-dotenv.config();
-connectDB();
-
 const app = express();
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+dotenv.config();
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use('/api/productos', require('./routes/productos'));
+const productosRoutes = require('./routes/productos');
+const clientesRoutes = require('./routes/clientes');
+const pedidosRoutes = require('./routes/pedidos');
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
+
+app.use(express.json());
+
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Conectado a MongoDB Atlas'))
+  .catch(err => console.error(err));
+
+
+app.use('/api/productos', productosRoutes);
+app.use('/api/clientes', clientesRoutes);
+app.use('/api/pedidos', pedidosRoutes);
+
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor escuchando en puerto ${PORT}`));
