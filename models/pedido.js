@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const PedidoSchema = new mongoose.Schema({
   id_pedido: {
     type: String,
@@ -11,17 +10,31 @@ const PedidoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  productos: [
+    {
+      id_producto: {
+        type: String,
+        required: true,
+      },
+      cantidad: {
+        type: Number,
+        required: true,
+      },
+      precio_unitario: {
+        type: Number,
+        required: true,
+      }
+    }
+  ],
   fecha: {
     type: String,
-    required: true
+    required: true,
+    default: Date.now()
   },
   estado: {
     type: String,
     required: true
   },
-  //productos: [DetalleProductoSchema] // ???
-}, {
-  timestamps: true
-});
+})
 
 module.exports = mongoose.model('Pedido', PedidoSchema);
