@@ -1,11 +1,10 @@
 const express = require('express');
-const mongoose =require ('mongoose');
 const productosRoutes = require('./routes/productos');
 const clientesRoutes = require('./routes/clientes');
 const pedidosRoutes = require('./routes/pedidos');
 const cors= require('cors');
 const bodyParser = require('body-parser');
-const connectDB=requiere('./config/db');
+const connectDB=require('./config/db');
 
 
 const app = express();

@@ -19,7 +19,7 @@ const PedidoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  productos: [DetalleProductoSchema]
+  //productos: [DetalleProductoSchema] // ???
 }, {
   timestamps: true
 });

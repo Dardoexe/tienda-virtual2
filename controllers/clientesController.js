@@ -1,19 +1,19 @@
-const Producto = require('../models/producto');
+const Cliente = require('../models/cliente');
 
-exports.obtenerProductos = async (req, res) => {
+exports.obtenerClientes = async (req, res) => {
   try {
-    const productos = await Producto.find();
-    res.json(productos);
+    const cliente = await Cliente.find();
+    res.json(cliente);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-exports.agregarProducto = async (req, res) => {
+exports.agregarCliente = async (req, res) => {
   try {
-    const producto = new Producto(req.body);
-    await producto.save();
-    res.json(producto);
+    const cliente = new Cliente(req.body);
+    await cliente.save();
+    res.json(cliente);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
