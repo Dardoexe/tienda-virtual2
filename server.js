@@ -1,21 +1,18 @@
 const express = require('express');
-const app = express();
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-dotenv.config();
-
+const mongoose =require ('mongoose');
 const productosRoutes = require('./routes/productos');
 const clientesRoutes = require('./routes/clientes');
 const pedidosRoutes = require('./routes/pedidos');
+const cors= require('cors');
+const bodyParser = require('body-parser');
+const connectDB=requiere('./config/db');
 
 
-app.use(express.json());
+const app = express();
+app.use (bodyParser.json());
+app.use(cors());
 
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ Conectado a MongoDB Atlas'))
-  .catch(err => console.error(err));
-
+connectDB();
 
 app.use('/api/productos', productosRoutes);
 app.use('/api/clientes', clientesRoutes);
