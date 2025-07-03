@@ -1,30 +1,23 @@
-require('dotenv').config();
-const { faker } = require('@faker-js/faker');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
+const faker = require('@faker-js/faker').faker;
+const Cliente = require('./models/cliente');
 
-async function main() {
-  const client = new MongoClient(process.env.MONGO_URI);
+mongoose.connect('mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority');
 
-  try {
-    await client.connect();
-    const db = client.db('tienda-virtual2');
-    const clientes = db.collection('clientes');
+async function seedClientes() {
+  await Cliente.deleteMany();
 
-    const items = Array.from({ length: 30 }).map(() => ({
-      nombre: faker.person.firstName(),
-      apellido: faker.person.lastName(),
-      email: faker.internet.email(),
-      telefono: faker.phone.number(),
-      direccion: faker.location.streetAddress(),
-    }));
+  const clientes = Array.from({ length: 5 }).map(() => ({
+    id_cliente: faker.string.uuid(),
+    nombre: faker.person.fullName(),
+    correo: faker.internet.email(),
+    telefono: faker.phone.number(),
+    direccion: faker.location.streetAddress()
+  }));
 
-    const result = await clientes.insertMany(items);
-    console.log(`✅ Se insertaron ${result.insertedCount} clientes en Atlas.`);
-  } catch (err) {
-    console.error('❌ Error al insertar clientes:', err);
-  } finally {
-    await client.close();
-  }
+  await Cliente.insertMany(clientes);
+  console.log('Clientes generados correctamente');
+  mongoose.connection.close();
 }
 
-main();
+seedClientes();

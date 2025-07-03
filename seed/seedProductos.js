@@ -1,31 +1,24 @@
-require('dotenv').config();
-const { faker } = require('@faker-js/faker');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
+const faker = require('@faker-js/faker').faker;
+const Producto = require('./models/producto');
 
-async function main() {
-  const client = new MongoClient(process.env.MONGO_URI);
+mongoose.connect('mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority');
 
-  try {
-    await client.connect();
-    const db = client.db('tienda-virtual2');
-    const productos = db.collection('productos');
+async function seedProductos() {
+  await Producto.deleteMany();
 
-    const items = Array.from({ length: 50 }).map(() => ({
-      nombre: faker.commerce.productName(),
-      descripcion: faker.commerce.productDescription(),
-      precio: parseFloat(faker.commerce.price(10, 500, 2)),
-      categoria: faker.commerce.department(),
-      stock: faker.number.int({ min: 0, max: 100 }),
-      imagen: faker.image.urlLoremFlickr({ category: 'product', width: 200, height: 200 }),
-    }));
+  const productos = Array.from({ length: 10 }).map(() => ({
+    id_producto: faker.string.uuid(),
+    nombre: faker.commerce.productName(),
+    descripcion: faker.commerce.productDescription(),
+    precio: parseFloat(faker.commerce.price({ min: 1000, max: 10000 })),
+    stock: faker.number.int({ min: 1, max: 100 }),
+    categoria: faker.commerce.department()
+  }));
 
-    const result = await productos.insertMany(items);
-    console.log(`✅ Se insertaron ${result.insertedCount} productos en Atlas.`);
-  } catch (err) {
-    console.error('❌ Error al insertar productos:', err);
-  } finally {
-    await client.close();
-  }
+  await Producto.insertMany(productos);
+  console.log('Productos generados correctamente');
+  mongoose.connection.close();
 }
 
-main();
+seedProductos();

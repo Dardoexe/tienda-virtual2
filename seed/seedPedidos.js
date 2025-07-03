@@ -1,41 +1,52 @@
-require('dotenv').config();
-const { faker } = require('@faker-js/faker');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
+const faker = require('@faker-js/faker').faker;
+const Pedido = require('./models/pedido');
+const DetallePedido = require('./models/detallePedido');
+const Cliente = require('./models/cliente');
+const Producto = require('./models/producto');
 
-async function main() {
-  const client = new MongoClient(process.env.MONGO_URI);
+mongoose.connect('mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority');
 
-  try {
-    await client.connect();
-    const db = client.db('tienda-virtual2');
-    const pedidos = db.collection('pedidos');
+async function seedPedidos() {
+  await Pedido.deleteMany();
+  await DetallePedido.deleteMany();
 
-    const items = Array.from({ length: 20 }).map(() => ({
-      cliente: {
-        nombre: faker.person.firstName(),
-        apellido: faker.person.lastName(),
-        email: faker.internet.email(),
-      },
-      productos: Array.from({ length: faker.number.int({ min: 1, max: 5 }) }).map(() => ({
-        nombre: faker.commerce.productName(),
-        cantidad: faker.number.int({ min: 1, max: 3 }),
-        precio: parseFloat(faker.commerce.price(10, 500, 2)),
-      })),
-      total: 0, // Lo calculamos abajo
-      fecha: faker.date.recent(),
-      estado: faker.helpers.arrayElement(['pendiente', 'enviado', 'entregado', 'cancelado']),
-    })).map(pedido => {
-      pedido.total = pedido.productos.reduce((acc, prod) => acc + prod.precio * prod.cantidad, 0);
-      return pedido;
+  const clientes = await Cliente.find();
+  const productos = await Producto.find();
+
+  const pedidos = [];
+
+  for (let i = 0; i < 10; i++) {
+    const cliente = faker.helpers.arrayElement(clientes);
+    const id_pedido = faker.string.uuid();
+    const fecha = faker.date.recent().toISOString().split('T')[0];
+
+    // Crear el pedido
+    pedidos.push({
+      id_pedido,
+      cliente_id: cliente.id_cliente,
+      fecha,
+      estado: faker.helpers.arrayElement(['pendiente', 'procesado', 'entregado'])
     });
 
-    const result = await pedidos.insertMany(items);
-    console.log(`✅ Se insertaron ${result.insertedCount} pedidos en Atlas.`);
-  } catch (err) {
-    console.error('❌ Error al insertar pedidos:', err);
-  } finally {
-    await client.close();
+    // Crear entre 1 y 3 productos para este pedido
+    const productosEnPedido = faker.helpers.arrayElements(productos, faker.number.int({ min: 1, max: 3 }));
+
+    for (const producto of productosEnPedido) {
+      const cantidad = faker.number.int({ min: 1, max: 5 });
+
+      await DetallePedido.create({
+        id_pedido,
+        id_producto: producto.id_producto,
+        cantidad,
+        precio_unitario: producto.precio
+      });
+    }
   }
+
+  await Pedido.insertMany(pedidos);
+  console.log('Pedidos y detalles generados correctamente');
+  mongoose.connection.close();
 }
 
-main();
+seedPedidos();
